@@ -1,10 +1,10 @@
+import { useEffect, useState } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { supabase } from '../lib/supabase'
 
-// Category colour helper
 function categoryClass(cat) {
   if (!cat) return ''
   const c = cat.toLowerCase()
@@ -14,7 +14,6 @@ function categoryClass(cat) {
   return ''
 }
 
-// Accuracy badge helper
 function AccuracyBadge({ pct, verified }) {
   if (!verified || verified === 0) {
     return <span className="accuracy-badge accuracy-badge--pending">Pending</span>
@@ -23,7 +22,6 @@ function AccuracyBadge({ pct, verified }) {
   return <span className={`accuracy-badge ${cls}`}>{pct}%</span>
 }
 
-// Format date
 function fmtDate(ts) {
   if (!ts) return '—'
   try {
@@ -35,7 +33,68 @@ function fmtDate(ts) {
   }
 }
 
-export default function Home({ predictions, leaderboard, stats }) {
+function buildLeaderboard(predictions) {
+  const expertMap = {}
+  for (const p of predictions) {
+    const u = p.username
+    if (!u || u === 'None') continue
+    if (!expertMap[u]) {
+      expertMap[u] = { username: u, total: 0, verified: 0, correct: 0, category: null }
+    }
+    expertMap[u].total++
+    if (p.status === 'correct' || p.status === 'wrong') expertMap[u].verified++
+    if (p.status === 'correct') expertMap[u].correct++
+    if (!expertMap[u].category && p.normalized) {
+      const norm = typeof p.normalized === 'string' ? JSON.parse(p.normalized) : p.normalized
+      expertMap[u].category = norm?.category || null
+    }
+  }
+  return Object.values(expertMap)
+    .map(e => ({
+      ...e,
+      accuracy: e.verified > 0 ? Math.round((e.correct / e.verified) * 100) : null
+    }))
+    .sort((a, b) => {
+      if (a.verified > 0 && b.verified === 0) return -1
+      if (b.verified > 0 && a.verified === 0) return 1
+      if (a.accuracy !== b.accuracy) return (b.accuracy || 0) - (a.accuracy || 0)
+      return b.total - a.total
+    })
+}
+
+export default function Home() {
+  const [predictions, setPredictions] = useState([])
+  const [leaderboard, setLeaderboard] = useState([])
+  const [stats, setStats] = useState({ total: 0, experts: 0, verified: 0 })
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const { data, error } = await supabase
+          .from('predictions')
+          .select('*')
+          .order('timestamp', { ascending: false })
+          .limit(20)
+
+        if (error) throw error
+
+        const preds = data || []
+        const lb = buildLeaderboard(preds)
+        const verified = lb.reduce((s, e) => s + e.verified, 0)
+
+        setPredictions(preds)
+        setLeaderboard(lb)
+        setStats({ total: preds.length, experts: lb.length, verified })
+      } catch (err) {
+        console.error('Fetch error:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [])
+
   const tickerItems = [
     '📌 Predictions tracked in real time',
     '⚡ Powered by Grok AI',
@@ -64,7 +123,6 @@ export default function Home({ predictions, leaderboard, stats }) {
 
       <Header />
 
-      {/* Ticker */}
       <div className="ticker">
         <div className="ticker__inner">
           {tickerItems.map((item, i) => (
@@ -73,7 +131,6 @@ export default function Home({ predictions, leaderboard, stats }) {
         </div>
       </div>
 
-      {/* Hero */}
       <section className="hero">
         <div className="hero__inner">
           <span className="hero__eyebrow">AI Prediction Tracker</span>
@@ -100,22 +157,21 @@ export default function Home({ predictions, leaderboard, stats }) {
           </div>
           <div className="hero__stats">
             <div>
-              <div className="hero__stat-number">{stats.total}</div>
+              <div className="hero__stat-number">{loading ? '—' : stats.total}</div>
               <div className="hero__stat-label">Predictions Tracked</div>
             </div>
             <div>
-              <div className="hero__stat-number">{stats.experts}</div>
+              <div className="hero__stat-number">{loading ? '—' : stats.experts}</div>
               <div className="hero__stat-label">Experts Monitored</div>
             </div>
             <div>
-              <div className="hero__stat-number">{stats.verified}</div>
+              <div className="hero__stat-number">{loading ? '—' : stats.verified}</div>
               <div className="hero__stat-label">Verified Outcomes</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Leaderboard */}
       <section className="section section--bordered" id="leaderboard">
         <div className="container">
           <div className="section__header">
@@ -124,7 +180,6 @@ export default function Home({ predictions, leaderboard, stats }) {
               Ranked by verified accuracy
             </span>
           </div>
-
           <div className="leaderboard">
             <div className="leaderboard__header">
               <span>#</span>
@@ -134,9 +189,14 @@ export default function Home({ predictions, leaderboard, stats }) {
               <span>Correct</span>
               <span>Accuracy</span>
             </div>
-            {leaderboard.length === 0 && (
+            {loading && (
               <div style={{ padding: '40px 20px', color: 'var(--gray-400)', textAlign: 'center' }}>
-                No experts with verified predictions yet. Check back soon.
+                Loading...
+              </div>
+            )}
+            {!loading && leaderboard.length === 0 && (
+              <div style={{ padding: '40px 20px', color: 'var(--gray-400)', textAlign: 'center' }}>
+                No experts yet. Tag @arkiveit to start tracking predictions.
               </div>
             )}
             {leaderboard.map((row, i) => (
@@ -162,7 +222,6 @@ export default function Home({ predictions, leaderboard, stats }) {
               </div>
             ))}
           </div>
-
           <p style={{ marginTop: 16, fontSize: '0.75rem', color: 'var(--gray-400)' }}>
             Accuracy = correct ÷ verified predictions only. Pending predictions are excluded.{' '}
             <Link href="/methodology" style={{ color: 'var(--red)' }}>Read our methodology →</Link>
@@ -170,7 +229,6 @@ export default function Home({ predictions, leaderboard, stats }) {
         </div>
       </section>
 
-      {/* Recent Predictions */}
       <section className="section section--bordered" id="predictions">
         <div className="container">
           <div className="section__header">
@@ -184,9 +242,13 @@ export default function Home({ predictions, leaderboard, stats }) {
               Submit a prediction →
             </a>
           </div>
-
           <div className="predictions-grid">
-            {predictions.length === 0 && (
+            {loading && (
+              <div style={{ padding: '60px', color: 'var(--gray-400)', gridColumn: '1/-1', textAlign: 'center' }}>
+                Loading predictions...
+              </div>
+            )}
+            {!loading && predictions.length === 0 && (
               <div style={{ padding: '60px', color: 'var(--gray-400)', gridColumn: '1/-1', textAlign: 'center' }}>
                 No predictions yet. Tag @arkiveit in a reply to any prediction tweet to get started.
               </div>
@@ -195,7 +257,6 @@ export default function Home({ predictions, leaderboard, stats }) {
               const norm = typeof p.normalized === 'string' ? JSON.parse(p.normalized) : (p.normalized || {})
               const category = norm.category || null
               const deadline = norm.deadline || null
-
               return (
                 <div key={p.post_id} className="prediction-card">
                   <div className="prediction-card__meta">
@@ -209,11 +270,9 @@ export default function Home({ predictions, leaderboard, stats }) {
                     </a>
                     <span className="prediction-card__date">{fmtDate(p.timestamp)}</span>
                   </div>
-
                   <p className="prediction-card__claim">
                     &ldquo;{p.claim_text}&rdquo;
                   </p>
-
                   <div className="prediction-card__footer">
                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                       {category && (
@@ -227,7 +286,6 @@ export default function Home({ predictions, leaderboard, stats }) {
                       {p.status || 'pending'}
                     </span>
                   </div>
-
                   {p.source_url && (
                     <a
                       href={p.source_url}
@@ -254,48 +312,33 @@ export default function Home({ predictions, leaderboard, stats }) {
         </div>
       </section>
 
-      {/* How it works */}
       <section className="section how-it-works">
         <div className="container">
           <div className="section__header" style={{ borderColor: 'rgba(255,255,255,0.15)' }}>
             <h2 className="section__title" style={{ color: 'var(--white)' }}>How It Works</h2>
           </div>
-
           <div className="steps">
             <div className="step">
               <div className="step__number">01</div>
               <div className="step__title">Expert makes a prediction</div>
-              <p className="step__desc">
-                A high-follower expert on X posts a bold claim about markets, elections,
-                or geopolitics.
-              </p>
+              <p className="step__desc">A high-follower expert on X posts a bold claim about markets, elections, or geopolitics.</p>
             </div>
             <div className="step">
               <div className="step__number">02</div>
               <div className="step__title">You tag @arkiveit</div>
-              <p className="step__desc">
-                Reply to the prediction tweet and tag @arkiveit. Our bot detects it
-                within 60 seconds.
-              </p>
+              <p className="step__desc">Reply to the prediction tweet and tag @arkiveit. Our bot detects it within 60 seconds.</p>
             </div>
             <div className="step">
               <div className="step__number">03</div>
               <div className="step__title">AI extracts and archives</div>
-              <p className="step__desc">
-                Grok AI reads the tweet and extracts the specific claim, timeframe,
-                and measurable outcome.
-              </p>
+              <p className="step__desc">Grok AI reads the tweet and extracts the specific claim, timeframe, and measurable outcome.</p>
             </div>
             <div className="step">
               <div className="step__number">04</div>
               <div className="step__title">We score the outcome</div>
-              <p className="step__desc">
-                When the deadline passes, we verify the outcome and update the
-                expert&apos;s accuracy score.
-              </p>
+              <p className="step__desc">When the deadline passes, we verify the outcome and update the expert's accuracy score.</p>
             </div>
           </div>
-
           <div style={{ marginTop: 48, textAlign: 'center' }}>
             <a
               href="https://twitter.com/intent/tweet?text=@arkiveit+track+this"
@@ -312,68 +355,4 @@ export default function Home({ predictions, leaderboard, stats }) {
       <Footer />
     </>
   )
-}
-
-export async function getStaticProps() {
-  try {
-    const { data: predictions, error } = await supabase
-      .from('predictions')
-      .select('*')
-      .order('timestamp', { ascending: false })
-      .limit(20)
-
-    console.log('Supabase response:', { count: predictions?.length, error })
-
-    if (error) throw error
-
-    // Build leaderboard
-    const expertMap = {}
-    for (const p of predictions || []) {
-      const u = p.username
-      if (!u || u === 'None') continue
-      if (!expertMap[u]) {
-        expertMap[u] = { username: u, total: 0, verified: 0, correct: 0, category: null }
-      }
-      expertMap[u].total++
-      if (p.status === 'correct' || p.status === 'wrong') expertMap[u].verified++
-      if (p.status === 'correct') expertMap[u].correct++
-      if (!expertMap[u].category && p.normalized) {
-        const norm = typeof p.normalized === 'string' ? JSON.parse(p.normalized) : p.normalized
-        expertMap[u].category = norm?.category || null
-      }
-    }
-
-    const leaderboard = Object.values(expertMap)
-      .map(e => ({
-        ...e,
-        accuracy: e.verified > 0 ? Math.round((e.correct / e.verified) * 100) : null
-      }))
-      .sort((a, b) => {
-        if (a.verified > 0 && b.verified === 0) return -1
-        if (b.verified > 0 && a.verified === 0) return 1
-        if (a.accuracy !== b.accuracy) return (b.accuracy || 0) - (a.accuracy || 0)
-        return b.total - a.total
-      })
-
-    const stats = {
-      total: predictions?.length || 0,
-      experts: Object.keys(expertMap).length,
-      verified: Object.values(expertMap).reduce((s, e) => s + e.verified, 0)
-    }
-
-    return {
-      props: {
-        predictions: predictions || [],
-        leaderboard,
-        stats
-      },
-      revalidate: 60 // ISR — regenerate every 60 seconds
-    }
-  } catch (err) {
-    console.error('Data fetch error:', err)
-    return {
-      props: { predictions: [], leaderboard: [], stats: { total: 0, experts: 0, verified: 0 } },
-      revalidate: 60
-    }
-  }
 }
