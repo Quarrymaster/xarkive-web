@@ -314,7 +314,7 @@ export default function Home({ predictions, leaderboard, stats }) {
   )
 }
 
-export async function getStaticProps() {
+export async function getServerSideProps() {
   try {
     // Fetch predictions
     const { data: predictions, error } = await supabase
@@ -365,8 +365,7 @@ export async function getStaticProps() {
         predictions: predictions || [],
         leaderboard,
         stats
-      },
-      revalidate: 60 // ISR — regenerate every 60 seconds
+      }
     }
   } catch (err) {
     console.error('Data fetch error:', err)
