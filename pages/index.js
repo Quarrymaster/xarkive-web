@@ -316,12 +316,13 @@ export default function Home({ predictions, leaderboard, stats }) {
 
 export async function getStaticProps() {
   try {
-    // Fetch predictions
     const { data: predictions, error } = await supabase
       .from('predictions')
       .select('*')
       .order('timestamp', { ascending: false })
       .limit(20)
+
+    console.log('Supabase response:', { count: predictions?.length, error })
 
     if (error) throw error
 
