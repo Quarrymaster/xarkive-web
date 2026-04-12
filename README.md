@@ -35,3 +35,4 @@ npm run dev
 
 Go to supabase.com → your project → Settings → API → copy the `anon` `public` key.
 This key is safe to use in the frontend — it only has read access to public data.
+
