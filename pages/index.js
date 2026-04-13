@@ -120,13 +120,56 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Arkiveit — Keeping track of predictions on X</title>
-        <meta name="description" content="AI-powered prediction tracker for X. We track what experts predict in finance, politics, geopolitics, and tech — and score whether they were right." />
-        <meta property="og:title" content="Arkiveit — Keeping track of predictions on X" />
-        <meta property="og:description" content="Hold experts accountable. We track predictions made on X and score accuracy over time." />
+        <title>Arkiveit — Keeping Track of Predictions on X</title>
+        <meta name="description" content="AI-powered prediction tracker for X. We archive expert predictions in finance, politics and geopolitics — and score whether they were right. Hold experts accountable." />
+        <meta name="keywords" content="prediction tracker, expert predictions, X twitter predictions, accountability, finance predictions, political predictions, AI tracker" />
+        <meta name="author" content="Arkiveit" />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href="https://xarkive.com" />
+
+        <meta property="og:type" content="website" />
         <meta property="og:url" content="https://xarkive.com" />
+        <meta property="og:title" content="Arkiveit — Keeping Track of Predictions on X" />
+        <meta property="og:description" content="We archive expert predictions in finance, politics and geopolitics — and score whether they were right. Hold experts accountable." />
+        <meta property="og:image" content="https://xarkive.com/og-image.png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:site_name" content="Arkiveit" />
+
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:site" content="@arkiveit" />
+        <meta name="twitter:creator" content="@arkiveit" />
+        <meta name="twitter:url" content="https://xarkive.com" />
+        <meta name="twitter:title" content="Arkiveit — Keeping Track of Predictions on X" />
+        <meta name="twitter:description" content="We archive expert predictions in finance, politics and geopolitics — and score whether they were right." />
+        <meta name="twitter:image" content="https://xarkive.com/og-image.png" />
+
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebApplication",
+              "name": "Arkiveit",
+              "url": "https://xarkive.com",
+              "description": "AI-powered prediction tracker for X. We archive expert predictions and score accuracy.",
+              "applicationCategory": "UtilityApplication",
+              "operatingSystem": "Web",
+              "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "USD"
+              },
+              "creator": {
+                "@type": "Organization",
+                "name": "Arkiveit",
+                "url": "https://xarkive.com",
+                "sameAs": "https://x.com/arkiveit"
+              }
+            })
+          }}
+        />
+
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
@@ -602,6 +645,32 @@ export default function Home() {
           }
           .main-layout__sidebar {
             position: static;
+            order: 2;
+          }
+          .hero--compact .hero__inner {
+            flex-direction: column;
+            gap: 24px;
+          }
+          .hero__right {
+            width: 100%;
+          }
+          .hero__stats {
+            gap: 12px;
+          }
+          .hero__stat {
+            flex: 1;
+            min-width: 80px;
+            padding: 12px;
+          }
+          .hero__stat .hero__stat-number {
+            font-size: 1.8rem;
+          }
+          .feed-filters {
+            flex-wrap: wrap;
+          }
+        }
+          .main-layout__sidebar {
+            position: static;
             order: -1;
           }
           .hero--compact .hero__inner {
@@ -622,6 +691,13 @@ export default function Home() {
           font-weight: 700;
           margin-right: 6px;
           color: var(--black);
+          * {
+          max-width: 100%;
+          box-sizing: border-box;
+        }
+        html, body {
+          overflow-x: hidden;
+          width: 100%;
         }
       `}</style>
     </>
