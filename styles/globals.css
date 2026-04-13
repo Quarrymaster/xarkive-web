@@ -464,6 +464,7 @@ h1, h2, h3 {
 .tag--finance { border-color: #1a4a7a; color: #1a4a7a; }
 .tag--politics { border-color: #7a1a1a; color: #7a1a1a; }
 .tag--geopolitics { border-color: #1a5a3a; color: #1a5a3a; }
+.tag--tech { border-color: #4a1a7a; color: #4a1a7a; }
 
 .status-dot {
   display: inline-flex;

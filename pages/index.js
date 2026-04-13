@@ -11,6 +11,7 @@ function categoryClass(cat) {
   if (c === 'finance') return 'tag--finance'
   if (c === 'politics') return 'tag--politics'
   if (c === 'geopolitics') return 'tag--geopolitics'
+  if (c === 'tech') return 'tag--tech'
   return ''
 }
 
@@ -112,7 +113,7 @@ export default function Home() {
     '📌 Predictions tracked in real time',
     '⚡ Powered by Grok AI',
     '🏆 Expert accuracy scored',
-    '📊 Finance · Politics · Geopolitics',
+    '📊 Finance · Politics · Geopolitics · Tech',
     '🤖 Tag @arkiveit to track any prediction',
   ]
 
@@ -120,7 +121,7 @@ export default function Home() {
     <>
       <Head>
         <title>Arkiveit — Keeping track of predictions on X</title>
-        <meta name="description" content="AI-powered prediction tracker for X. We track what experts predict in finance, politics and geopolitics — and score whether they were right." />
+        <meta name="description" content="AI-powered prediction tracker for X. We track what experts predict in finance, politics, geopolitics, and tech — and score whether they were right." />
         <meta property="og:title" content="Arkiveit — Keeping track of predictions on X" />
         <meta property="og:description" content="Hold experts accountable. We track predictions made on X and score accuracy over time." />
         <meta property="og:url" content="https://xarkive.com" />
@@ -191,7 +192,7 @@ export default function Home() {
               <div className="feed-header">
                 <h2 className="feed-header__title">Recent Predictions</h2>
                 <div className="feed-filters">
-                  {['all', 'finance', 'politics', 'geopolitics'].map(f => (
+                  {['all', 'finance', 'politics', 'geopolitics', 'tech'].map(f => (
                     <button
                       key={f}
                       onClick={() => setFilter(f)}
