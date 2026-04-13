@@ -222,7 +222,7 @@ export default function Home() {
                   const category = norm.category || null
                   const deadline = norm.deadline || null
                   return (
-                    <div key={p.post_id} className="feed-card">
+                    <div key={p.post_id} className={`feed-card feed-card--${p.status || 'pending'}`}>
                       <div className="feed-card__meta">
                         <a
                           href={`https://x.com/${p.username}`}
@@ -237,6 +237,14 @@ export default function Home() {
                       <p className="feed-card__claim">
                         &ldquo;{p.claim_text}&rdquo;
                       </p>
+                      {(p.status === 'correct' || p.status === 'wrong') && p.outcome_notes && (
+  <div className="feed-card__outcome">
+    <span className="feed-card__outcome-label">
+      {p.status === 'correct' ? '✅ Correct —' : '❌ Wrong —'}
+    </span>
+    {p.outcome_notes}
+  </div>
+)}
                       <div className="feed-card__footer">
                         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
                           {category && (
@@ -599,6 +607,21 @@ export default function Home() {
           .hero--compact .hero__inner {
             flex-direction: column;
           }
+            .feed-card__outcome {
+          background: var(--gray-100);
+          border-left: 3px solid var(--gray-400);
+          padding: 10px 14px;
+          font-size: 0.85rem;
+          line-height: 1.6;
+          margin-bottom: 16px;
+          color: var(--gray-600);
+        }
+        .feed-card--correct .feed-card__outcome { border-color: var(--correct); }
+        .feed-card--wrong .feed-card__outcome { border-color: var(--wrong); }
+        .feed-card__outcome-label {
+          font-weight: 700;
+          margin-right: 6px;
+          color: var(--black);
         }
       `}</style>
     </>
