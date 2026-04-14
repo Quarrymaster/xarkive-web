@@ -5,7 +5,7 @@ export default function Footer() {
     <footer className="site-footer">
       <div className="site-footer__inner">
         <div className="site-footer__logo">
-          Ark<span>ive</span>it
+          <img src="/logo.png" alt="Arkiveit" />
         </div>
         <div className="site-footer__links">
           <Link href="/methodology">Methodology</Link>
@@ -13,7 +13,7 @@ export default function Footer() {
           <Link href="/privacy">Privacy</Link>
         </div>
         <div className="site-footer__copy">
-          © {new Date().getFullYear()} Arkiveit. Keeping track of predictions on X.
+          © {new Date().getFullYear()} Arkiveit — Keeping track of predictions on X
         </div>
       </div>
     </footer>
