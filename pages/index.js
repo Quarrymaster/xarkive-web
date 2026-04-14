@@ -125,6 +125,7 @@ export default function Home() {
         <meta name="keywords" content="prediction tracker, expert predictions, X twitter predictions, accountability, finance predictions, political predictions, AI tracker" />
         <meta name="author" content="Arkiveit" />
         <meta name="robots" content="index, follow" />
+        <meta name="google-site-verification" content="BxOYXal-YvcSGGAV9G1_siPv_uBWZGd87pFdclSkZbI" />
         <link rel="canonical" href="https://xarkive.com" />
 
         <meta property="og:type" content="website" />
